@@ -3,6 +3,11 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Main.java to edit this template
  */
 package server;
+import org.json.JSONObject;
+
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  *
@@ -10,11 +15,21 @@ package server;
  */
 public class Server {
 
+    public static ConcurrentLinkedQueue<JSONObject> queue = new ConcurrentLinkedQueue<>();
+    public static LinkedList<ClientManager> connectedClients;
+
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) {
         // TODO code application logic here
+        System.out.println("Server starting...");
     }
-    
+
+    public static Boolean authenticate(String username, String password) {
+        // TODO
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+
 }
