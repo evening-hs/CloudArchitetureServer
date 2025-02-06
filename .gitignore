@@ -1,1 +1,7 @@
 */private/
+build/
+lib/
+.idea/
+*.jar
+*.class
+*.iml
