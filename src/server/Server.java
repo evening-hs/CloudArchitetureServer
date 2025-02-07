@@ -5,7 +5,6 @@
 package server;
 import org.json.JSONObject;
 
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -16,7 +15,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public class Server {
 
     public static ConcurrentLinkedQueue<JSONObject> queue = new ConcurrentLinkedQueue<>();
-    public static LinkedList<ClientManager> connectedClients;
+    public static ConcurrentLinkedQueue<ClientManager> connectedClients;
 
     /**
      * @param args the command line arguments
@@ -31,5 +30,20 @@ public class Server {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
+    public static void multicast() throws InterruptedException {
+        for (;;) {
+            Thread.sleep(50);
 
+            JSONObject message = queue.poll();
+
+            if (message == null)
+                continue;
+
+            for (ClientManager client : connectedClients) {
+                if (!client.username.equals(message.getString("username"))) {
+                    client.queue.add(message);
+                }
+            }
+        }
+    }
 }
