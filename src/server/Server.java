@@ -4,7 +4,8 @@
  */
 package server;
 
-//import org.json.JSONObject;
+import java.util.LinkedList;
+import org.json.JSONObject;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -17,7 +18,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  * @author uriel
  */
 public class Server {
-    // public static ConcurrentLinkedQueue<JSONObject> queue = new ConcurrentLinkedQueue<>();
+    public static ConcurrentLinkedQueue<JSONObject> queue = new ConcurrentLinkedQueue<>();
     public static ConcurrentLinkedQueue<ClientManager> connectedClients;
 
     /**
@@ -59,4 +60,21 @@ public class Server {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
+    public static void multicast() throws InterruptedException {
+        for (;;) {
+            Thread.sleep(50);
+
+            JSONObject message = queue.poll();
+
+            if (message == null)
+                continue;
+
+            for (ClientManager client : connectedClients) {
+                if (!client.username.equals(message.getString("username"))) {
+                    client.queue.add(message);
+                }
+            }
+        }
+    }
 }
+
