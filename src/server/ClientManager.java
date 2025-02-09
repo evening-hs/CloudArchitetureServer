@@ -1,16 +1,17 @@
 package server;
 
 import org.json.JSONObject;
-
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.net.InetAddress;
+
 
 public class ClientManager {
-    public String ip;
+    public InetAddress ip;
     public int port;
     public String username;
     public ConcurrentLinkedQueue<JSONObject> queue = new ConcurrentLinkedQueue<>();
 
-    public ClientManager(String ip, int port, String username) {
+    public ClientManager(InetAddress ip, int port, String username) {
         this.ip = ip;
         this.port = port;
         this.username = username;
