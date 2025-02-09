@@ -19,27 +19,34 @@ public class AddClient extends Thread {
 
     @Override
     public void run() {
-        String received;
         try {
-            dos.writeUTF("Add username");
-            received = dis.readUTF();
-            //json
-            if (received.equals("Exit")) {
-                System.out.println("Client " + socket + " sends Exit...");
-                System.out.println("Closing the connection.");
-                socket.close();
-                System.out.println("Connection closed.");
-            }
-            System.out.println(received);
+            dos.writeUTF("Enter username:");
+            String username = dis.readUTF();
 
-            ClientManager client = new ClientManager(
-                    socket.getInetAddress(),socket.getPort(),
-                    received,socket, dis, dos);
-            client.run();
-            Server.connectedClients.add(client);
+            dos.writeUTF("Enter password:");
+            String password = dis.readUTF();
+
+            if (Server.authenticate(username, password)) {
+                dos.writeUTF("Authentication successful");
+                System.out.println("Client " + username + " authenticated.");
+
+                ClientManager client = new ClientManager(socket.getInetAddress(), socket.getPort(), username);
+                Server.connectedClients.add(client);
+            } else {
+                dos.writeUTF("Authentication failed");
+                System.out.println("Authentication failed for " + username);
+                socket.close();
+            }
         } catch (Exception e) {
-            System.out.println(e);
+            System.out.println("Error: " + e);
+        } finally {
+            try {
+                dis.close();
+                dos.close();
+                socket.close();
+            } catch (IOException e) {
+                System.out.println("Error closing resources: " + e);
+            }
         }
     }
-
 }
