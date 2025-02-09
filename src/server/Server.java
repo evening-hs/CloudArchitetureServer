@@ -18,8 +18,10 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  * @author uriel
  */
 public class Server {
-    public static ConcurrentLinkedQueue<JSONObject> queue = new ConcurrentLinkedQueue<>();
-    public static ConcurrentLinkedQueue<ClientManager> connectedClients;
+    public static ConcurrentLinkedQueue<JSONObject> queue
+            = new ConcurrentLinkedQueue<>();
+    public static ConcurrentLinkedQueue<ClientManager> connectedClients
+            = new ConcurrentLinkedQueue<>();
 
     /**
      * @param args the command line arguments
@@ -27,6 +29,15 @@ public class Server {
     public static void main(String[] args) {
         // TODO code application logic here
         System.out.println("Server starting...");
+
+        Thread multicastThread = new Thread(() -> {
+            try {
+                multicast();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        });
+        multicastThread.start();
 
         try {
             ServerSocket serverSocket = new ServerSocket(2555);
@@ -45,6 +56,7 @@ public class Server {
                     Thread t = new AddClient(socket, dis, dos);
                     t.start();
                 } catch (Exception e) {
+                    assert socket != null;
                     socket.close();
                     System.out.println("Server Error: " + e);
                 }
@@ -66,11 +78,14 @@ public class Server {
 
             JSONObject message = queue.poll();
 
-            if (message == null)
+            if (message == null) {
                 continue;
+            }
+
+            String sender = message.getString("username");
 
             for (ClientManager client : connectedClients) {
-                if (!client.username.equals(message.getString("username"))) {
+                if (!client.username.equals(sender)) {
                     client.queue.add(message);
                 }
             }
