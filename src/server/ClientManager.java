@@ -11,7 +11,13 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.net.InetAddress;
 
 
-public class ClientManager {
+public class ClientManager extends Thread {
+    // Maximum number of messages in the queue before the client is
+    // considered unresponsive and the connection is closed
+    private static final int MAX_QUEUED_MESSAGES = 10;
+
+    private int CLIENT_STATUS;
+
     public InetAddress ip;
     public int port;
     public String username;
@@ -20,6 +26,9 @@ public class ClientManager {
     private Socket socket;
     private DataInputStream dis;
     private DataOutputStream dos;
+
+    private Thread senderThread;
+    private Thread receiverThread;
 
     public ClientManager(InetAddress ip, int port, String username,
                          Socket socket, DataInputStream dis,
@@ -32,38 +41,46 @@ public class ClientManager {
         this.dos = dos;
     }
 
+    @Override
     public void run() {
-        Thread senderThread = new Thread(() -> {
+        this.senderThread = new Thread(() -> {
             try {
                 sender();
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
+            } catch (IOException e) {
+                closeConnection();
             }
         });
-        Thread receiverThread = new Thread(this::receiver);
-        senderThread.start();
-        receiverThread.start();
+        this.receiverThread = new Thread(() -> {
+            try {
+                receiver();
+            } catch (IOException e) {
+                closeConnection();
+            }
+        });
+        this.senderThread.start();
+        this.receiverThread.start();
     }
 
-    public void receiver() {
+    public void receiver() throws IOException {
         for (;;) {
             try {
                 JSONObject received = new JSONObject(this.dis.readUTF());
-                // FIXME no está recibiendo nada aquí
                 Server.queue.add(received);
                 System.out.println("Server received:\n" + received);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
             } catch (JSONException e) {
-                System.err.println("Client sent a message with invalid JSON: "
-                        + e);
+                System.err.println("Ignoring message because it has invalid " +
+                        "JSON: " + e);
             }
         }
     }
 
-    public void sender() throws InterruptedException {
+    public void sender() throws IOException {
         for (;;) {
-            Thread.sleep(50);
+            try {
+                Thread.sleep(50);
+            } catch (InterruptedException e) {
+                System.err.println(e);
+            }
 
             JSONObject message = this.queue.poll();
 
@@ -71,14 +88,34 @@ public class ClientManager {
                 continue;
 
             System.out.println("Sending message\n" + message);
-            try {
-                this.dos.writeUTF(message.toString());
-            } catch (IOException e) {
-                System.err.println("Cannot send message\n: " + message);
-                // Add the message back to the queue so we can try to send it
-                // again
-                this.queue.add(message);
-            }
+            this.dos.writeUTF(message.toString());
         }
     }
+
+    /**
+     * Closes the data streams and the socket causing exceptions in all other
+     * threads which indicates them to stop.
+     */
+    public void closeConnection() {
+        try {
+            this.dis.close();
+        } catch (IOException e) {
+            System.err.println("Cannot close DataInputStream gracefully");
+        }
+        try {
+            this.dos.close();
+        } catch (IOException e) {
+            System.err.println("Cannot close DataOutputStream gracefully");
+        }
+        try {
+            this.socket.close();
+        } catch (IOException e) {
+            System.err.println("Cannot close socket gracefully");
+        }
+
+        this.senderThread.interrupt();
+        this.receiverThread.interrupt();
+        this.interrupt();
+    }
 }
+
