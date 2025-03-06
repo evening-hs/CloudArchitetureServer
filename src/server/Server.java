@@ -18,6 +18,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  * @author uriel
  */
 public class Server {
+    // Messages queue that stores the messages from all clients.
     public static ConcurrentLinkedQueue<JSONObject> queue
             = new ConcurrentLinkedQueue<>();
     public static ConcurrentLinkedQueue<ClientManager> connectedClients
@@ -27,7 +28,6 @@ public class Server {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        // TODO code application logic here
         System.out.println("Server starting...");
 
         Thread multicastThread = new Thread(() -> {

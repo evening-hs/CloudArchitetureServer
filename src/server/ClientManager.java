@@ -18,15 +18,19 @@ public class ClientManager extends Thread {
 
     private int CLIENT_STATUS;
 
+    // IP address and port of the client
+    // these are not being used right now, but might be used in the future.
     public InetAddress ip;
     public int port;
     public String username;
+    // queue that stores the messages
     public ConcurrentLinkedQueue<JSONObject> queue
             = new ConcurrentLinkedQueue<>();
+    // variables required for the communication
     private Socket socket;
     private DataInputStream dis;
     private DataOutputStream dos;
-
+    // threads for communication
     private Thread senderThread;
     private Thread receiverThread;
 
@@ -41,6 +45,13 @@ public class ClientManager extends Thread {
         this.dos = dos;
     }
 
+    /**
+     * Client manager main method.
+     *
+     * Creates two threads, one for sending and one for receiving.
+     * If either of the two threads are interrupted, the client is completely
+     * disconnected.
+     * */
     @Override
     public void run() {
         this.senderThread = new Thread(() -> {
@@ -61,6 +72,10 @@ public class ClientManager extends Thread {
         this.receiverThread.start();
     }
 
+    /**
+     * Receiver threads
+     * Receives messages and puts them in the the server messages queue.
+     * */
     public void receiver() throws IOException {
         for (;;) {
             try {
@@ -74,6 +89,11 @@ public class ClientManager extends Thread {
         }
     }
 
+    /**
+     * Sender threads
+     * Picks messages from the client queue and sends them through the socket
+     * If the client queue gets too long, it disconnects the client.
+     * */
     public void sender() throws IOException {
         for (;;) {
             try {
@@ -86,6 +106,10 @@ public class ClientManager extends Thread {
 
             if (message == null)
                 continue;
+
+            if (this.queue.length() >= MAX_QUEUED_MESSAGES) {
+                throw new IOException("Client queue became too big");
+            }
 
             System.out.println("Sending message\n" + message);
             this.dos.writeUTF(message.toString());
@@ -112,6 +136,8 @@ public class ClientManager extends Thread {
         } catch (IOException e) {
             System.err.println("Cannot close socket gracefully");
         }
+
+        // TODO remove client from server clients list
 
         this.senderThread.interrupt();
         this.receiverThread.interrupt();
