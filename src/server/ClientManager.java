@@ -107,7 +107,7 @@ public class ClientManager extends Thread {
             if (message == null)
                 continue;
 
-            if (this.queue.length() >= MAX_QUEUED_MESSAGES) {
+            if (this.queue.size() >= MAX_QUEUED_MESSAGES) {
                 throw new IOException("Client queue became too big");
             }
 
