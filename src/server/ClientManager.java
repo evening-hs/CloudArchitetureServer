@@ -137,7 +137,7 @@ public class ClientManager extends Thread {
             System.err.println("Cannot close socket gracefully");
         }
 
-        // TODO remove client from server clients list
+        Server.connectedClients.remove(this);
 
         this.senderThread.interrupt();
         this.receiverThread.interrupt();

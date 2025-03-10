@@ -35,8 +35,8 @@ public class AddClient extends Thread {
             ClientManager client = new ClientManager(
                     socket.getInetAddress(),socket.getPort(),
                     received,socket, dis, dos);
-            client.start();
             Server.connectedClients.add(client);
+            client.start();
         } catch (Exception e) {
             System.out.println(e);
         }
