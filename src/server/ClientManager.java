@@ -7,6 +7,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.net.InetAddress;
 
@@ -142,6 +143,17 @@ public class ClientManager extends Thread {
         this.senderThread.interrupt();
         this.receiverThread.interrupt();
         this.interrupt();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof ClientManager that)) return false;
+        return Objects.equals(username, that.username);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(username);
     }
 }
 

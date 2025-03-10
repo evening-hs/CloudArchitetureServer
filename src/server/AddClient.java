@@ -1,5 +1,7 @@
 package server;
 
+import org.json.JSONObject;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -21,10 +23,13 @@ public class AddClient extends Thread {
     public void run() {
         String received;
         try {
-            dos.writeUTF("Add username");
+            JSONObject sendJSON = new JSONObject();
+            sendJSON.put("command", "username");
+            dos.writeUTF(sendJSON.toString());
             received = dis.readUTF();
-            //json
-            if (received.equals("Exit")) {
+
+            JSONObject receivedJSON = new JSONObject(received);
+            if (receivedJSON.has("command") && receivedJSON.get("command").equals("exit")) {
                 System.out.println("Client " + socket + " sends Exit...");
                 System.out.println("Closing the connection.");
                 socket.close();

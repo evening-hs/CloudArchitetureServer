@@ -68,7 +68,7 @@ public class Server {
     }
 
     public static Boolean authenticate(String username, String password) {
-        // TODO
+        // TODO esto deberia estar en AddClient
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
