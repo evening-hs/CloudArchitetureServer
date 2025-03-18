@@ -19,7 +19,7 @@ If login succesfull
 ```json
 {
     "username": "server",
-    "command": "ok",
+    "command": "ok"
 }
 ```
 
