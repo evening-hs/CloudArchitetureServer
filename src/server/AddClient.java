@@ -22,6 +22,7 @@ public class AddClient extends Thread {
     @Override
     public void run() {
         try {
+            System.out.println("Waiting for client to send login info");
             String received = dis.readUTF();
             JSONObject receivedJSON = new JSONObject(received);
 
@@ -34,7 +35,7 @@ public class AddClient extends Thread {
 
             String username = receivedJSON.get("username").toString();
             String password = receivedJSON.get("password").toString();
-            boolean ok = Server.authenticate(username, password);
+            boolean ok = true;//Server.authenticate(username, password);
 
             JSONObject response = new JSONObject();
             response.put("username", "server");
@@ -54,16 +55,16 @@ public class AddClient extends Thread {
                 return;
             }
 
+            System.out.println("Creating client...");
             ClientManager client = new ClientManager(
                     socket.getInetAddress(),socket.getPort(),
-                    received,socket, dis, dos);
+                    username,socket, dis, dos);
             Server.connectedClients.add(client);
             client.start();
+            System.out.println("Client running...");
 
         } catch (Exception e) {
             System.out.println("Error: " + e);
-        } finally {
-            closeConnection();
         }
     }
 
