@@ -1,5 +1,7 @@
 package server;
 
+import org.json.JSONObject;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -20,33 +22,48 @@ public class AddClient extends Thread {
     @Override
     public void run() {
         try {
-            dos.writeUTF("Enter username:");
-            String username = dis.readUTF();
+            received = dis.readUTF();
+            JSONObject receivedJSON = new JSONObject(received);
 
-            dos.writeUTF("Enter password:");
-            String password = dis.readUTF();
-
-            if (Server.authenticate(username, password)) {
-                dos.writeUTF("Authentication successful");
-                System.out.println("Client " + username + " authenticated.");
-
-                ClientManager client = new ClientManager(socket.getInetAddress(), socket.getPort(), username);
-                Server.connectedClients.add(client);
-            } else {
-                dos.writeUTF("Authentication failed");
-                System.out.println("Authentication failed for " + username);
-                socket.close();
+            if (!receivedJSON.get("command").equals("login")) {
+                System.out.println("Client " + socket + " sent "
+                        + receivedJSON.get("command"));
+                closeConnection();
+                return;
             }
+
+            String username = receivedJSON.get("username").toString();
+            String password = receivedJSON.get("password").toString();
+            boolean ok = Server.authenticate(username, password);
+
+            JSONObject response = new JSONObject();
+            response.put("username", "server");
+
+            if (ok) {
+                response.put("command", "ok");
+            } else {
+                response.put("command", "error");
+                response.put("message", "Invalid username or password");
+            }
+
+            dos.writeUTF(response.toString());
+            dos.flush();
+
+            if (!ok) {
+                closeConnection();
+                return;
+            }
+
+            ClientManager client = new ClientManager(
+                    socket.getInetAddress(),socket.getPort(),
+                    received,socket, dis, dos);
+            Server.connectedClients.add(client);
+            client.start();
+
         } catch (Exception e) {
             System.out.println("Error: " + e);
         } finally {
-            try {
-                dis.close();
-                dos.close();
-                socket.close();
-            } catch (IOException e) {
-                System.out.println("Error closing resources: " + e);
-            }
+            closeConnection();
         }
     }
 }
