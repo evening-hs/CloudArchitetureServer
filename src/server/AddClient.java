@@ -23,19 +23,37 @@ public class AddClient extends Thread {
     public void run() {
         String received;
         try {
-            JSONObject sendJSON = new JSONObject();
-            sendJSON.put("command", "username");
-            dos.writeUTF(sendJSON.toString());
             received = dis.readUTF();
-
             JSONObject receivedJSON = new JSONObject(received);
-            if (receivedJSON.has("command") && receivedJSON.get("command").equals("exit")) {
-                System.out.println("Client " + socket + " sends Exit...");
-                System.out.println("Closing the connection.");
-                socket.close();
-                System.out.println("Connection closed.");
+
+            if (!receivedJSON.get("command").equals("login")) {
+                System.out.println("Client " + socket + " sent "
+                        + receivedJSON.get("command"));
+                closeConnection();
+                return;
             }
-            System.out.println(received);
+
+            String username = receivedJSON.get("username").toString();
+            String password = receivedJSON.get("password").toString();
+            boolean ok = Server.authenticate(username, password);
+
+            JSONObject response = new JSONObject();
+            response.put("username", "server");
+
+            if (ok) {
+                response.put("command", "ok");
+            } else {
+                response.put("command", "error");
+                response.put("message", "Invalid username or password");
+            }
+
+            dos.writeUTF(response.toString());
+            dos.flush();
+
+            if (!ok) {
+                closeConnection();
+                return;
+            }
 
             ClientManager client = new ClientManager(
                     socket.getInetAddress(),socket.getPort(),
@@ -47,4 +65,17 @@ public class AddClient extends Thread {
         }
     }
 
+    private void closeConnection() {
+        try {
+            System.out.println("Closing the connection.");
+
+            dis.close();
+            dos.close();
+            socket.close();
+
+            System.out.println("Connection closed.");
+        } catch (IOException e) {
+            System.err.println("Could not close connection.");
+        }
+    }
 }
