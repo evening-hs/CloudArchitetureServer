@@ -21,7 +21,6 @@ public class AddClient extends Thread {
 
     @Override
     public void run() {
-        String received;
         try {
             received = dis.readUTF();
             JSONObject receivedJSON = new JSONObject(received);
@@ -60,22 +59,11 @@ public class AddClient extends Thread {
                     received,socket, dis, dos);
             Server.connectedClients.add(client);
             client.start();
+
         } catch (Exception e) {
-            System.out.println(e);
-        }
-    }
-
-    private void closeConnection() {
-        try {
-            System.out.println("Closing the connection.");
-
-            dis.close();
-            dos.close();
-            socket.close();
-
-            System.out.println("Connection closed.");
-        } catch (IOException e) {
-            System.err.println("Could not close connection.");
+            System.out.println("Error: " + e);
+        } finally {
+            closeConnection();
         }
     }
 }
