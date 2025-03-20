@@ -22,7 +22,7 @@ public class AddClient extends Thread {
     @Override
     public void run() {
         try {
-            received = dis.readUTF();
+            String received = dis.readUTF();
             JSONObject receivedJSON = new JSONObject(received);
 
             if (!receivedJSON.get("command").equals("login")) {
@@ -64,6 +64,20 @@ public class AddClient extends Thread {
             System.out.println("Error: " + e);
         } finally {
             closeConnection();
+        }
+    }
+
+    private void closeConnection() {
+        try {
+            System.out.println("Closing the connection.");
+
+            dis.close();
+            dos.close();
+            socket.close();
+
+            System.out.println("Connection closed.");
+        } catch (IOException e) {
+            System.err.println("Could not close connection.");
         }
     }
 }
