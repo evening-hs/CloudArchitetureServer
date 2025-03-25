@@ -35,7 +35,7 @@ public class AddClient extends Thread {
 
             String username = receivedJSON.get("username").toString();
             String password = receivedJSON.get("password").toString();
-            boolean ok = true;//Server.authenticate(username, password);
+            boolean ok = Server.authenticate(username, password);
 
             JSONObject response = new JSONObject();
             response.put("username", "server");

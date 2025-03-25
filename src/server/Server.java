@@ -4,7 +4,6 @@
  */
 package server;
 
-import java.util.LinkedList;
 import org.json.JSONObject;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -36,7 +35,7 @@ public class Server {
             System.out.println("MySQL JDBC Driver loaded!");
         } catch (ClassNotFoundException e) {
         System.out.println("Error: No se encontró el driver de MySQL.");
-        e.printStackTrace();
+            System.err.println(e);
         }
     }
     
@@ -120,6 +119,8 @@ public class Server {
 
             for (ClientManager client : connectedClients) {
                 if (!client.username.equals(sender)) {
+                    System.out.println("Adding message to client's queue "
+                            + client.username);
                     client.queue.add(message);
                 }
             }
