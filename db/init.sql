@@ -8,6 +8,13 @@ CREATE TABLE usuario (
 
 INSERT INTO usuario (username, password) VALUES
 ("admin", "admin"),
-("evelyn", "evelyn"),
-("antoine", "antoine");
-
+("evelyn", "hola"),
+("antoine", "pepepicapapas"),
+("dodani", "rocky"),
+("santiago", "dzn"),
+("emi", "12345"),
+("uriel", "1234"),
+("palmi", "5678"),
+("eric", "6728"),
+("noe", "1402"),
+("alex", "3804");
