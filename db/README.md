@@ -11,7 +11,7 @@ La base de datos ya debería estar corriendo.
 Para conectase:
 
 ```bash
-docker compose exec mysql -u root -pWin2002Racedb$
+docker compose exec mysql mysql -u root -pWin2002Racedb$
 ```
 
 Para detener la base de datos:
