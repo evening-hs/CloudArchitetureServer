@@ -24,6 +24,7 @@ public class AddClient extends Thread {
         try {
             System.out.println("Waiting for client to send login info");
             String received = dis.readUTF();
+            System.out.println("received: " + received);
             JSONObject receivedJSON = new JSONObject(received);
 
             if (!receivedJSON.get("command").equals("login")) {
@@ -35,7 +36,7 @@ public class AddClient extends Thread {
 
             String username = receivedJSON.get("username").toString();
             String password = receivedJSON.get("password").toString();
-            boolean ok = true;//Server.authenticate(username, password);
+            boolean ok = Server.authenticate(username, password);
 
             JSONObject response = new JSONObject();
             response.put("username", "server");
@@ -65,6 +66,7 @@ public class AddClient extends Thread {
 
         } catch (Exception e) {
             System.out.println("Error: " + e);
+            closeConnection();
         }
     }
 
