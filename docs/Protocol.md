@@ -75,19 +75,22 @@ revivir.
     "username": <username>,
     "command": "spawn",
     "x": <x coords>,
-    "y": <y coords>
+    "y": <y coords>,
+    "numLives": <num lives>,
+    "facing": <"left", "right", "up", "down">
 }
 ```
 
 Cuando esto sucede, todos los clientes deben responder con su status:
 
-```
+```json
 {
     "username", <username>,
     "command": "status",
     "x": <x coords>,
     "y", <y coords>,
     "numLives": <num lives>
+    "facing": <"left", "right", "up", "down">
 }
 ```
 
@@ -95,7 +98,7 @@ Resumen de los comandos válidos durante la comunicación asíncrona:
 
 Otro comando especial es `died`.
 
-```
+```json
 {
     "username", <username>,
     "command", "died",
