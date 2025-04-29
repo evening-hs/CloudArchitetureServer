@@ -1,0 +1,18 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: restor-db
+    environment:
+      MYSQL_ROOT_PASSWORD: Win2002Racedb$
+      MYSQL_DATABASE: restordb
+      MYSQL_USER: gameuser
+      MYSQL_PASSWORD: Win2002Racedb$
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - mysql-data:/var/lib/mysql
+
+volumes:
+  mysql-data:
+
